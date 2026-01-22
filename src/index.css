@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+* {
+  /* margin: 0;
+  padding: 0; */
+  box-sizing: border-box;
+}
+
+.appCont {
+  height: 100vh;
+  background: rgb(65, 65, 65);
+}
+.scale {
+  animation: scale 0.5s ease-in-out;
+}
+@keyframes scale {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.toast {
+  animation: toast 1.5s ease forwards;
+}
+@keyframes toast {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.hover {
+  background: hsla(0, 3%, 68%, 0.6);
+}
+.hover:hover {
+  background: hsla(0, 3%, 68%, 0.8);
+}
+
+.ContactCont {
+  background: rgb(59, 59, 59);
+  height: 100vh;
+  /* padding: 0.5rem; */
+}
+.contactItem:hover {
+  background: rgb(80, 80, 80);
+  border-radius: 0.5rem;
+}
+.contactItem:active {
+  transform: scale(1.02);
+}
+
+/* @keyframes slide-in {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.5s ease forwards;
+} */
