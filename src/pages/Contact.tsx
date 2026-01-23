@@ -1,10 +1,18 @@
 // import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const Contact = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="ContactCont">
       <div className="contactHead bg-black p-2 flex flex-row items-center">
-        <img src="/images/arrow.png" className="h-5 w-5 mr-4" alt="" />
+        <img
+          onClick={() => navigate(-1)}
+          src="/images/arrow.png"
+          className="h-5 w-5 mr-4"
+          alt=""
+        />
         <div className="text-white font-bold">tweet2pic</div>
       </div>
       <div className="my-12">
@@ -26,18 +34,37 @@ const Contact = () => {
           <img className="mr-3" src="/images/email.png" alt="" />
           <div className="font-bold text-white">Email</div>
         </div>
-        <div className=" p-4 flex  flex-row items-center cursor-pointer contactItem ">
-          <img className="mr-3 h-8 w-8" src="/images/twitter.png" alt="" />
+        <a
+          href="https://x.com/@ebube_dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          className=" p-4 flex  flex-row items-center cursor-pointer contactItem "
+        >
+          <div className="bg-white h-8 w-8 rounded mr-3">
+            <img className="mr-3 h-8 w-8" src="/images/twitter.png" alt="" />
+          </div>
           <div className="font-bold text-white">X(formerly Twitter)</div>
-        </div>
-        <div className=" p-4 flex  flex-row items-center cursor-pointer contactItem ">
+        </a>
+        <a
+          href="https://www.linkedin.com/in/ebube-felix-🧑🏽%E2%80%8D💻-820a3724a/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className=" p-4 flex  flex-row items-center cursor-pointer contactItem "
+        >
           <img className="mr-3 h-8 w-8" src="/images/linkedin.png" alt="" />
           <div className="font-bold text-white">linkedIn</div>
-        </div>
-        <div className=" p-4 flex  flex-row items-center cursor-pointer contactItem ">
-          <img className="mr-3 h-7 w-7" src="/images/share.png" alt="" />
-          <div className="font-bold text-white">Share</div>
-        </div>
+        </a>
+        <a
+          href="https://www.github.com/ebuski100/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className=" p-4 flex  flex-row items-center cursor-pointer contactItem "
+        >
+          <div className="bg-white h-7 w-7 rounded mr-3">
+            <img className="mr-3 h-7 w-7" src="/images/github.png" alt="" />
+          </div>
+          <div className="font-bold text-white">Github</div>
+        </a>
       </div>
     </div>
   );
