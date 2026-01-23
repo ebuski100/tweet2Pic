@@ -1,10 +1,15 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+
+import Contact from "../components/Contact";
+import Settings from "../components/Settings";
 const Home = () => {
   const [dark, setDark] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
-  const navigate = useNavigate();
+  const [settingsModal, setShowSettingsModal] = useState(false);
+
+  const [infoModal, setInfoModal] = useState(false);
+
   const showSavedToast = () => {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2000);
@@ -27,18 +32,21 @@ const Home = () => {
   };
 
   return (
-    <div className="border h-[100%] appCont ">
+    <div className="border pb-10 appCont ">
       <div className="header bg-black flex flex-row items-center justify-between p-4">
         <div className="text-2xl font-bold text-white">tweet2pic</div>
 
         <div className="flex  text-white flex-row items-center">
           <div
-            onClick={() => navigate("/contact")}
+            onClick={() => setInfoModal(true)}
             className="my-2 mx-4 cursor-pointer active:scale-105"
           >
             <img src="/images/info.png" alt="" />
           </div>
-          <div className="my-2 mx-4 cursor-pointer active:scale-105">
+          <div
+            onClick={() => setShowSettingsModal(true)}
+            className="my-2 mx-4 cursor-pointer active:scale-105"
+          >
             <img src="/images/settings.png" alt="" />
           </div>
         </div>
@@ -106,6 +114,12 @@ const Home = () => {
           </div>
         </div>
       </div>
+      <Settings
+        settingsModal={settingsModal}
+        setShowSettingsModal={setShowSettingsModal}
+      />
+
+      <Contact infoModal={infoModal} setInfoModal={setInfoModal} />
 
       <div
         className={`
@@ -119,7 +133,6 @@ const Home = () => {
       >
         Picture saved
       </div>
-      {/* )} */}
     </div>
   );
 };
