@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import Contact from "../components/Contact";
 import Settings from "../components/Settings";
+import Edit from "../components/Edit";
 const Home = () => {
   const [dark, setDark] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -9,10 +10,16 @@ const Home = () => {
   const [settingsModal, setShowSettingsModal] = useState(false);
 
   const [infoModal, setInfoModal] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const showSavedToast = () => {
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2000);
+    setTimeout(() => {
+      setShowToast(true);
+
+      setTimeout(() => {
+        setShowToast(false);
+      }, 2000);
+    }, 1000);
   };
 
   const handleShare = async () => {
@@ -93,7 +100,10 @@ const Home = () => {
               <div className="text-white font-medium">Dark theme</div>
             </div>
 
-            <div className="hover bg-gray-400 rounded py-2 px-4 w-[40%] flex  justify-center cursor-pointer active:scale-105 transition-transform duration-200">
+            <div
+              onClick={() => setIsEditModalOpen(true)}
+              className="hover bg-gray-400 rounded py-2 px-4 w-[40%] flex  justify-center cursor-pointer active:scale-105 transition-transform duration-200"
+            >
               <img src="/images/edit.png" className="h-5 w-5" alt="" />
             </div>
           </div>
@@ -117,6 +127,11 @@ const Home = () => {
       <Settings
         settingsModal={settingsModal}
         setShowSettingsModal={setShowSettingsModal}
+      />
+
+      <Edit
+        isEditModalOpen={isEditModalOpen}
+        setIsEditModalOpen={setIsEditModalOpen}
       />
 
       <Contact infoModal={infoModal} setInfoModal={setInfoModal} />

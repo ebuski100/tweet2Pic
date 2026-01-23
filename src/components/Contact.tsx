@@ -9,11 +9,11 @@ const Contact = ({ infoModal, setInfoModal }: goInfo) => {
       className={`contactOverlay fixed top-0 left-0 right-0 bottom-0 bg-[#3b3b3b] transform transition-transform duration-500 ease-out ${infoModal ? "translate-x-0" : "translate-x-full"}`}
     >
       <div className="ContactCont animate-slide-in">
-        <div className="contactHead bg-black p-2 flex flex-row items-center">
+        <div className="contactHead bg-black px-2 flex flex-row items-center py-4">
           <img
             onClick={() => setInfoModal(false)}
             src="/images/arrow.png"
-            className="h-5 w-5 mr-4"
+            className="h-5 w-5 mr-4 ml-3"
             alt=""
           />
           <div className="text-white font-bold">tweet2pic</div>

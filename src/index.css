@@ -1,8 +1,6 @@
 @import "tailwindcss";
 
 * {
-  /* margin: 0;
-  padding: 0; */
   box-sizing: border-box;
 }
 
@@ -66,11 +64,9 @@
 @keyframes slide-in {
   0% {
     transform: translateX(100%);
-    /* opacity: 0; */
   }
   100% {
     transform: translateX(0);
-    /* opacity: 1; */
   }
 }
 
