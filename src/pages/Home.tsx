@@ -34,13 +34,27 @@ const Home = () => {
   const [infoModal, setInfoModal] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const tweetDivRef = useRef<HTMLDivElement>(null);
+
+  const normalizeTweetUrl = (url: string) => {
+    try {
+      const u = new URL(url);
+      if (u.hostname === "x.com") {
+        u.hostname = "twitter.com";
+      }
+      u.search = ""; // remove ?s=20 etc
+      return u.toString();
+    } catch {
+      return url;
+    }
+  };
+
   const convertTweetToImage = async () => {
     if (!tweetUrl) return;
     setIsLoading(true);
-
+    const normalizedUrl = normalizeTweetUrl(tweetUrl);
     try {
       const oembedRes = await fetch(
-        `https://publish.twitter.com/oembed?url=${encodeURIComponent(tweetUrl)}`,
+        `https://publish.twitter.com/oembed?url=${encodeURIComponent(normalizedUrl)}`,
       );
       if (!oembedRes.ok) {
         alert("Invalid Tweet URL or tweet not embeddable");
