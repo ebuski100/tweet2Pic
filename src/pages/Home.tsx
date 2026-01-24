@@ -10,16 +10,30 @@ const Home = () => {
   const [showToast, setShowToast] = useState(false);
   const [tweetUrl, setTweetUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  // useEffect(() => {
+  //   const params = new URLSearchParams(window.location.search);
+  //   const url = params.get("tweet");
+  //   if (url) setTweetUrl(url);
+  // }, []);
+
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const url = params.get("tweet");
-    if (url) setTweetUrl(url);
-  }, []);
+    const url = searchParams.get("tweet");
+    if (url) {
+      setTweetUrl(url);
+    }
+  }, [searchParams]);
+
+  const clearUrl = () => {
+    setTweetUrl("");
+  };
+
   const [settingsModal, setShowSettingsModal] = useState(false);
 
   const [infoModal, setInfoModal] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
+  const tweetDivRef = useRef<HTMLDivElement>(null);
   const convertTweetToImage = async () => {
     if (!tweetUrl) return;
     setIsLoading(true);
@@ -35,12 +49,10 @@ const Home = () => {
       }
       const oembedData = await oembedRes.json();
       const embedHtml = oembedData.html;
-      const tweetDivRef = useRef<HTMLDivElement>(null);
 
       if (!tweetDivRef.current) return;
       tweetDivRef.current.innerHTML = embedHtml;
 
-      // Wait a bit for Twitter embed to render
       setTimeout(async () => {
         if (!tweetDivRef.current) return;
         const canvas = await html2canvas(tweetDivRef.current, { scale: 2 });
@@ -122,94 +134,76 @@ const Home = () => {
             value={tweetUrl}
             onChange={(e) => setTweetUrl(e.target.value)}
             placeholder="Paste tweet URL here"
-            className="flex-1 border-b border-b-white  outline-none   "
+            className="flex-1 border-b border-b-white  outline-none placeholder-gray-400  text-gray-200 "
             type="text"
           />
           <div className="flex flex-row items-center  ">
             <img
+              onClick={clearUrl}
               className="p-2 cursor-pointer"
               src="/images/close.png"
               alt=""
             />
-            <button className="bg-blue-400 p-2 text-white font-bold rounded cursor-pointer active:scale-105 hover:bg-blue-300">
-              submit
+            <button
+              onClick={convertTweetToImage}
+              className="bg-blue-400 p-2 text-white font-bold rounded cursor-pointer active:scale-105 hover:bg-blue-300"
+            >
+              {isLoading ? "Loading…" : "Generate"}
             </button>
           </div>
         </div>
         <div className="imgCont border border-green-300 w-full h-[70%] mb-3  p-2 ">
-          <div className="homecont h-[87%] flex flex-col">
-            <div className="w-full flex flex-row p-3 items-center justify-between">
-              <input
-                className="flex-1 border-b border-b-white outline-none p-2"
-                type="text"
-                placeholder="Paste Tweet URL here"
-                value={tweetUrl}
-                onChange={(e) => setTweetUrl(e.target.value)}
-              />
-              <div className="flex flex-row items-center">
-                <button
-                  onClick={convertTweetToImage}
-                  className="bg-blue-400 p-2 text-white font-bold rounded cursor-pointer active:scale-105 hover:bg-blue-300"
-                >
-                  {isLoading ? "Loading…" : "Generate"}
-                </button>
-                <button
-                  onClick={downloadImage}
-                  className="bg-green-500 p-2 text-white font-bold rounded ml-2 hover:bg-green-400 active:scale-105"
-                >
-                  Download
-                </button>
-              </div>
-            </div>
-            <div ref={tweetDivRef} className="hidden"></div>
-          </div>
-
-          <div>
-            <div className="flex flex-row  items-center justify-between px-4">
-              <div className="flex flex-row  items-center justify-center">
-                <button
-                  onClick={() => setDark(!dark)}
-                  className={`  m-2 h-[30px] w-[30px] cursor-pointer flex items-center 
+          <div ref={tweetDivRef} className="hidden"></div>
+        </div>
+        <div>
+          <div className="flex flex-row  items-center justify-between px-4">
+            <div className="flex flex-row  items-center justify-center">
+              <button
+                onClick={() => setDark(!dark)}
+                className={`  m-2 h-[30px] w-[30px] cursor-pointer flex items-center 
                 justify-center
                  p-2 rounded
                 ${dark ? "bg-blue-400" : "border-3 border-gray-300  "}
                 `}
-                >
-                  {dark && (
-                    <img
-                      className={`w-4 h-4 scale`}
-                      src="/images/check.png"
-                      alt=""
-                    />
-                  )}
-                </button>
-                <div className="text-white font-medium">Dark theme</div>
-              </div>
-
-              <div
-                onClick={() => setIsEditModalOpen(true)}
-                className="hover bg-gray-400 rounded py-2 px-4 w-[40%] flex  justify-center cursor-pointer active:scale-105 transition-transform duration-200"
               >
-                <img src="/images/edit.png" className="h-5 w-5" alt="" />
-              </div>
+                {dark && (
+                  <img
+                    className={`w-4 h-4 scale`}
+                    src="/images/check.png"
+                    alt=""
+                  />
+                )}
+              </button>
+              <div className="text-white font-medium">Dark theme</div>
             </div>
 
-            <div className="flex flex-row items-center justify-between py-2 px-4">
-              <div
-                onClick={showSavedToast}
-                className=" hover  rounded py-2 px-4 w-[40%] flex justify-center cursor-pointer active:scale-105 transition-transform duration-200 "
-              >
-                <img className="w-6 h-6" src="/images/downloads.png" alt="" />
-              </div>
-              <div
-                onClick={handleShare}
-                className="hover rounded py-2 px-4 w-[40%] flex justify-center cursor-pointer active:scale-105 transition-transform duration-200"
-              >
-                <img className="w-6 h-6" src="/images/share.png" alt="" />
-              </div>
+            <div
+              onClick={() => setIsEditModalOpen(true)}
+              className="hover bg-gray-400 rounded py-2 px-4 w-[40%] flex  justify-center cursor-pointer active:scale-105 transition-transform duration-200"
+            >
+              <img src="/images/edit.png" className="h-5 w-5" alt="" />
+            </div>
+          </div>
+
+          <div className="flex flex-row items-center justify-between py-2 px-4">
+            <div
+              onClick={() => {
+                downloadImage();
+                showSavedToast();
+              }}
+              className=" hover  rounded py-2 px-4 w-[40%] flex justify-center cursor-pointer active:scale-105 transition-transform duration-200 "
+            >
+              <img className="w-6 h-6" src="/images/downloads.png" alt="" />
+            </div>
+            <div
+              onClick={handleShare}
+              className="hover rounded py-2 px-4 w-[40%] flex justify-center cursor-pointer active:scale-105 transition-transform duration-200"
+            >
+              <img className="w-6 h-6" src="/images/share.png" alt="" />
             </div>
           </div>
         </div>
+
         <Settings
           settingsModal={settingsModal}
           setShowSettingsModal={setShowSettingsModal}
