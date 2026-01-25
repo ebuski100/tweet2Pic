@@ -45,8 +45,11 @@ app.post("/api/tweet-to-image", async (req, res) => {
 
     await browser.close();
 
-    res.setHeader("Content-Type", "image/png");
-    res.send(imageBuffer);
+    const base64 = imageBuffer.toString("base64");
+
+    res.json({
+      image: `data:image/png;base64,${base64}`,
+    });
   } catch (err) {
     await browser.close();
     res.status(500).json({ error: "Failed to render tweet" });

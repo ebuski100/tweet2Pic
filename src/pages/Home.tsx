@@ -36,14 +36,14 @@ const Home = () => {
     setImageUrl(null);
 
     try {
-      const res = await fetch("http://localhost:4000/screenshot", {
+      const res = await fetch("http://localhost:4000/tweet-to-image", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           tweetUrl,
-          dark,
+          theme: dark ? "dark" : "light",
         }),
       });
 
