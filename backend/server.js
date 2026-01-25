@@ -13,49 +13,41 @@ app.post("/api/tweet-to-image", async (req, res) => {
     return res.status(400).json({ error: "Tweet URL required" });
   }
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({
+    headless: true,
+  });
+
   const page = await browser.newPage({
     viewport: { width: 900, height: 1200 },
   });
 
   try {
-    await page.goto(tweetUrl, { waitUntil: "networkidle" });
+    const embedUrl = `https://publish.twitter.com/?query=${encodeURIComponent(
+      tweetUrl,
+    )}`;
 
-    // Remove login modal if it appears
-    await page.addStyleTag({
-      content: `
-        div[role="dialog"] { display: none !important; }
-        body { overflow: auto !important; }
-      `,
-    });
+    await page.goto(embedUrl, { waitUntil: "networkidle" });
 
-    // Dark / light mode
     await page.emulateMedia({
       colorScheme: theme === "dark" ? "dark" : "light",
     });
 
-    // Wait for the tweet
-    const tweet = await page.waitForSelector('article[data-testid="tweet"]', {
+    const tweet = await page.waitForSelector("twitter-widget", {
       timeout: 15000,
     });
 
-    const imageBuffer = await tweet.screenshot({
-      type: "png",
-    });
-
-    await browser.close();
+    const imageBuffer = await tweet.screenshot({ type: "png" });
 
     const base64 = imageBuffer.toString("base64");
+
+    await browser.close();
 
     res.json({
       image: `data:image/png;base64,${base64}`,
     });
   } catch (err) {
+    console.error(err);
     await browser.close();
     res.status(500).json({ error: "Failed to render tweet" });
   }
-});
-
-app.listen(4000, () => {
-  console.log("Backend running on http://localhost:4000");
 });
