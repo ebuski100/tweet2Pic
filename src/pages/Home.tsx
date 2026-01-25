@@ -1,19 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Contact from "../components/Contact";
 import Settings from "../components/Settings";
 import Edit from "../components/Edit";
-import html2canvas from "html2canvas";
-
-declare global {
-  interface Window {
-    twttr?: {
-      widgets: {
-        load: (element?: HTMLElement) => Promise<void>;
-      };
-    };
-  }
-}
 
 const Home = () => {
   const [dark, setDark] = useState(false);
@@ -21,6 +10,8 @@ const Home = () => {
   const [tweetUrl, setTweetUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [searchParams] = useSearchParams();
+
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const url = searchParams.get("tweet");
@@ -37,89 +28,44 @@ const Home = () => {
 
   const [infoModal, setInfoModal] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const tweetDivRef = useRef<HTMLDivElement>(null);
-
-  const normalizeTweetUrl = (url: string) => {
-    try {
-      const u = new URL(url);
-      if (u.hostname === "x.com") {
-        u.hostname = "twitter.com";
-      }
-      u.search = ""; // remove ?s=20 etc
-      return u.toString();
-    } catch {
-      return url;
-    }
-  };
-
-  const loadTwitterScript = () => {
-    return new Promise<void>((resolve) => {
-      if (window.twttr?.widgets) {
-        resolve();
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src = "https://platform.twitter.com/widgets.js";
-      script.async = true;
-      script.onload = () => resolve();
-      document.body.appendChild(script);
-    });
-  };
 
   const convertTweetToImage = async () => {
-    if (!tweetUrl || !tweetDivRef.current) return;
+    if (!tweetUrl) return;
 
     setIsLoading(true);
+    setImageUrl(null);
 
     try {
-      loadTwitterScript();
+      const res = await fetch("http://localhost:4000/screenshot", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tweetUrl,
+          dark,
+        }),
+      });
 
-      const normalizedUrl = normalizeTweetUrl(tweetUrl);
-
-      const res = await fetch(
-        `https://publish.twitter.com/oembed?url=${encodeURIComponent(
-          normalizedUrl,
-        )}`,
-      );
       if (!res.ok) {
-        alert("Invalid Tweet URL or tweet not embeddable");
-        setIsLoading(false);
-        return;
+        throw new Error("Failed to generate image");
       }
 
       const data = await res.json();
-      tweetDivRef.current.innerHTML = data.html;
-
-      // Wait for Twitter embed to fully render
-      setTimeout(async () => {
-        if (window.twttr?.widgets) {
-          await window.twttr.widgets.load(tweetDivRef.current);
-        }
-        const canvas = await html2canvas(tweetDivRef.current!, {
-          scale: 2,
-          backgroundColor: null,
-        });
-
-        const imgUrl = canvas.toDataURL("image/png");
-
-        const imgCont = document.querySelector(".imgCont") as HTMLDivElement;
-        if (imgCont) {
-          imgCont.innerHTML = `<img src="${imgUrl}" class="w-full rounded-lg" />`;
-        }
-        setIsLoading(false);
-      }, 2000);
+      setImageUrl(data.image); // base64 image
     } catch (err) {
       console.error(err);
+      alert("Could not generate tweet image");
+    } finally {
       setIsLoading(false);
     }
   };
+
   const downloadImage = () => {
-    const imgCont = document.querySelector(".imgCont img") as HTMLImageElement;
-    if (!imgCont) return;
+    if (!imageUrl) return;
 
     const a = document.createElement("a");
-    a.href = imgCont.src;
+    a.href = imageUrl;
     a.download = "tweet2pic.png";
     a.click();
   };
@@ -195,12 +141,24 @@ const Home = () => {
             </button>
           </div>
         </div>
-        <div className="imgCont border border-green-300 w-full h-[70%] mb-3  p-2 ">
-          <div
-            ref={tweetDivRef}
-            className="absolute -left-[9999px] top-0"
-          ></div>
+        <div className="imgCont border border-green-300 w-full h-[70%] mb-3 p-2 flex items-center justify-center">
+          {isLoading && <div className="text-white">Generating image…</div>}
+
+          {!isLoading && imageUrl && (
+            <img
+              src={imageUrl}
+              className="w-full rounded-lg"
+              alt="Tweet preview"
+            />
+          )}
+
+          {!isLoading && !imageUrl && (
+            <div className="text-gray-400 text-sm">
+              Generated image will appear here
+            </div>
+          )}
         </div>
+
         <div>
           <div className="flex flex-row  items-center justify-between px-4">
             <div className="flex flex-row  items-center justify-center">
