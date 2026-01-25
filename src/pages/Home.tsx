@@ -5,18 +5,18 @@ import Settings from "../components/Settings";
 import Edit from "../components/Edit";
 import html2canvas from "html2canvas";
 
+declare global {
+  interface Window {
+    twttr?: string;
+  }
+}
+
 const Home = () => {
   const [dark, setDark] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [tweetUrl, setTweetUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [searchParams] = useSearchParams();
-
-  // useEffect(() => {
-  //   const params = new URLSearchParams(window.location.search);
-  //   const url = params.get("tweet");
-  //   if (url) setTweetUrl(url);
-  // }, []);
 
   useEffect(() => {
     const url = searchParams.get("tweet");
@@ -48,43 +48,62 @@ const Home = () => {
     }
   };
 
+  const loadTwitterScript = () => {
+    if (window.twttr) return;
+
+    const script = document.createElement("script");
+    script.src = "https://platform.twitter.com/widgets.js";
+    script.async = true;
+    document.body.appendChild(script);
+  };
+
   const convertTweetToImage = async () => {
-    if (!tweetUrl) return;
+    if (!tweetUrl || !tweetDivRef.current) return;
+
     setIsLoading(true);
-    const normalizedUrl = normalizeTweetUrl(tweetUrl);
+
     try {
-      const oembedRes = await fetch(
-        `https://publish.twitter.com/oembed?url=${encodeURIComponent(normalizedUrl)}`,
+      loadTwitterScript();
+
+      const normalizedUrl = normalizeTweetUrl(tweetUrl);
+
+      const res = await fetch(
+        `https://publish.twitter.com/oembed?url=${encodeURIComponent(
+          normalizedUrl,
+        )}`,
       );
-      if (!oembedRes.ok) {
+      if (!res.ok) {
         alert("Invalid Tweet URL or tweet not embeddable");
         setIsLoading(false);
         return;
       }
-      const oembedData = await oembedRes.json();
-      const embedHtml = oembedData.html;
 
-      if (!tweetDivRef.current) return;
-      tweetDivRef.current.innerHTML = embedHtml;
+      const data = await res.json();
+      tweetDivRef.current.innerHTML = data.html;
 
+      // Wait for Twitter embed to fully render
       setTimeout(async () => {
-        if (!tweetDivRef.current) return;
-        const canvas = await html2canvas(tweetDivRef.current, { scale: 2 });
-        const dataURL = canvas.toDataURL("image/png");
-        const imgCont = document.querySelector(".imgCont") as HTMLDivElement;
-        if (imgCont)
-          imgCont.innerHTML = `<img src="${dataURL}" alt="tweet image" />`;
+        if (window.twttr?.widgets) {
+          await window.twttr.widgets.load(tweetDivRef.current);
+        }
+        const canvas = await html2canvas(tweetDivRef.current!, {
+          scale: 2,
+          backgroundColor: null,
+        });
 
+        const imgUrl = canvas.toDataURL("image/png");
+
+        const imgCont = document.querySelector(".imgCont") as HTMLDivElement;
+        if (imgCont) {
+          imgCont.innerHTML = `<img src="${imgUrl}" class="w-full rounded-lg" />`;
+        }
         setIsLoading(false);
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 2000);
-      }, 1500);
+      }, 2000);
     } catch (err) {
       console.error(err);
       setIsLoading(false);
     }
   };
-
   const downloadImage = () => {
     const imgCont = document.querySelector(".imgCont img") as HTMLImageElement;
     if (!imgCont) return;
