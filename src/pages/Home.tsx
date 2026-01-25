@@ -7,7 +7,11 @@ import html2canvas from "html2canvas";
 
 declare global {
   interface Window {
-    twttr?: string;
+    twttr?: {
+      widgets: {
+        load: (element?: HTMLElement) => Promise<void>;
+      };
+    };
   }
 }
 
@@ -49,12 +53,18 @@ const Home = () => {
   };
 
   const loadTwitterScript = () => {
-    if (window.twttr) return;
+    return new Promise<void>((resolve) => {
+      if (window.twttr?.widgets) {
+        resolve();
+        return;
+      }
 
-    const script = document.createElement("script");
-    script.src = "https://platform.twitter.com/widgets.js";
-    script.async = true;
-    document.body.appendChild(script);
+      const script = document.createElement("script");
+      script.src = "https://platform.twitter.com/widgets.js";
+      script.async = true;
+      script.onload = () => resolve();
+      document.body.appendChild(script);
+    });
   };
 
   const convertTweetToImage = async () => {
@@ -186,7 +196,10 @@ const Home = () => {
           </div>
         </div>
         <div className="imgCont border border-green-300 w-full h-[70%] mb-3  p-2 ">
-          <div ref={tweetDivRef} className="hidden"></div>
+          <div
+            ref={tweetDivRef}
+            className="absolute -left-[9999px] top-0"
+          ></div>
         </div>
         <div>
           <div className="flex flex-row  items-center justify-between px-4">
